@@ -1,11 +1,6 @@
----
-title: "Coursera Reproducible Research Assigment 1"
-author: "Lukasz Chlystowski"
-date: "24 kwietnia 2017"
-output: 
-  html_document: 
-    keep_md: yes
----
+# Coursera Reproducible Research Assigment 1
+Lukasz Chlystowski  
+24 kwietnia 2017  
 
 
 ## Intro
@@ -20,7 +15,8 @@ This is an R Markdown document containing all answers for **Coursera Reproducibl
 4. unzipping downloaded file. All of that is done in working directory.
 
 
-```{r init, echo=TRUE, message = FALSE, warning=FALSE}
+
+```r
 library(dplyr)
 library(ggplot2)
 
@@ -36,14 +32,15 @@ if (!file.exists("activity.csv")) {
 1. Reading data from the file to activity data.frame
 2. Creating summarized data frame for plotting histogram, removing missing values
 
-```{r processing}
+
+```r
 activity <- read.csv("activity.csv", colClasses = c("integer", "Date", "integer"))
 steps.by.day <- summarize(group_by(activity, date), steps = sum(steps, na.rm = TRUE))
-
 ```
 
 ## Plotting histogram of the total number of steps taken each day
-```{r hist}
+
+```r
 hist(steps.by.day$steps, 
      col = "steelblue", 
      breaks = 50, 
@@ -53,23 +50,28 @@ hist(steps.by.day$steps,
      xlim = c(0, 25000))
 ```
 
+![](PA1_template_files/figure-html/hist-1.png)<!-- -->
+
 ## Calculating mean and median of the total number of steps taken per day.
-```{r figures}
+
+```r
 mean.steps.by.day <- mean(steps.by.day$steps)
 median.steps.by.day <- median(steps.by.day$steps)
 ```
 
-* Mean: `r mean.steps.by.day`
-* Median:  `r median.steps.by.day`
+* Mean: 9354.2295082
+* Median:  10395
 
 ## Plotting time series plot of the average number of steps taken by interval
 
 1. fist part preparing data - creating summarized data frame 
-```{r data_prep}
+
+```r
 steps.by.interval <- summarize(group_by(activity, interval), steps = mean(steps, na.rm = TRUE))
 ```
 2. plotting 
-```{r time series plot}
+
+```r
 with(steps.by.interval, plot(interval, steps, 
                              lty = 1, type = "l", 
                              main = "Average numbers of steps by interval",
@@ -77,13 +79,16 @@ with(steps.by.interval, plot(interval, steps,
                              ylab = "Average steps taken"))
 ```
 
+![](PA1_template_files/figure-html/time series plot-1.png)<!-- -->
+
 ## Finding the 5-minute interval that, on average, contains the maximum number of steps
 
-```{r}
+
+```r
 max.interval <-steps.by.interval[which.max(steps.by.interval$steps),1]
 ```
 
-the 5-minute interval that, on average, contains the maximum number of steps is interval - `r max.interval`
+the 5-minute interval that, on average, contains the maximum number of steps is interval - 835
 
 ## Code to describe and show a strategy for imputing missing data
 
@@ -94,7 +99,8 @@ I have decided to fill those missing steps with average number of steps for give
  - All missing values are assigned to logical **missing** vector.
  - then **activity2** data frame is filled with relevant average number of steps from **steps.by.interval** data frame. 
 
-```{r missing data}
+
+```r
 activity2<- activity
 
 missing <- is.na(activity$steps)
@@ -109,7 +115,8 @@ activity2$steps[missing] <- unlist(sapply(activity2$interval[missing], function(
 
 ## Histogram of the total number of steps taken each day after missing values are imputed
 
-```{r histogram without missig values}
+
+```r
 steps.by.day.2 <- summarize(group_by(activity2, date), steps = sum(steps))
 
 # histogram 
@@ -122,13 +129,15 @@ hist(steps.by.day.2$steps,
      xlim = c(0, 25000))
 ```
 
+![](PA1_template_files/figure-html/histogram without missig values-1.png)<!-- -->
+
 ## Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends
 
 1. In order to plot required chart I've added new column to the **activity2** data frame with two levels weekday and weekend. 
 As I'm using different than english set of locales and function _weekdays()_ is using locales setting, names of week days are in different language (polish in my case).
 
-```{r days.of.week}
 
+```r
 activity2$days.of.week <- as.factor(sapply(activity2$date, function(x) 
                                                         { 
                                                         if (weekdays(x)=="sobota" | 
@@ -144,7 +153,8 @@ activity2$days.of.week <- as.factor(sapply(activity2$date, function(x)
                                     )
 ```
 2. plot 
-```{r panel plot}
+
+```r
 steps.by.interval2 <- summarize(group_by(activity2, interval, days.of.week), steps = mean(steps))
 
 g <- ggplot(steps.by.interval2, aes(x= interval, y = steps, 
@@ -158,5 +168,7 @@ g + geom_line(stat = "identity") +
         theme(plot.title = element_text(hjust = 0.5))
 ```
 
-Build with R version: `r getRversion()`
+![](PA1_template_files/figure-html/panel plot-1.png)<!-- -->
+
+Build with R version: 3.3.2
 
